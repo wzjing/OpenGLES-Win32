@@ -11,6 +11,8 @@ extern "C" {
 
 void load_file(char **content, char *filename);
 
+int get_file_size(char *filename);
+
 #ifdef __cplusplus
 };
 #endif // __cplusplus

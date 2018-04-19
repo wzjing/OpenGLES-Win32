@@ -3,6 +3,7 @@
 #include <EGL/egl.h>
 #include "util/gl-util.h"
 #include "util/win-util.h"
+#include "util/native-log.h"
 
 typedef struct {
     // Handle to a program object
@@ -178,7 +179,7 @@ int esMain(ESContext *esContext) {
     return GL_TRUE;
 }
 
-int main() {
+int main1() {
     ESContext esContext;
 
     memset(&esContext, 0, sizeof(ESContext));
@@ -201,8 +202,10 @@ int main() {
     return 0;
 }
 
-int main1(int argc, char **argv) {
+
+int main(int argc, char **argv) {
     char *content;
     load_file(&content, "test.log");
-    printf("Result: %s\n", content);
+    logd("Finished Program");
+    return 0;
 }
