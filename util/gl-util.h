@@ -86,8 +86,6 @@ ESUTIL_API esRegisterKeyFunc(ESContext *esContext, void (ESCALLBACK *keyFunc)(ES
 
 char *ESUTIL_API esLoadTGA(void *ioContext, const char * fileName, int *width, int *height);
 
-void ESUTIL_API esLogMessage(const char *formatStr, ...);
-
 //load shader by shader code
 GLuint ESUTIL_API esLoadShader(GLenum shaderType, const char *pSource);
 

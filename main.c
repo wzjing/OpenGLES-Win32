@@ -4,12 +4,19 @@
 #include "util/gl-util.h"
 #include "util/win-util.h"
 #include "util/native-log.h"
+#include <time.h>
+
+#define WIDTH 1280
+#define HEIGHT 720
 
 typedef struct {
     // Handle to a program object
     GLuint programObject;
 
 } UserData;
+
+GLint time_handle;
+GLint resolution_handle;
 
 ///
 // Create a shader object, load the shader source, and
@@ -44,7 +51,7 @@ GLuint LoadShader(GLenum type, const char *shaderSrc) {
             char *infoLog = malloc(sizeof(char) * infoLen);
 
             glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-            esLogMessage("Error compiling shader:\n%s\n", infoLog);
+            loge("Error compiling shader:\n%s\n", infoLog);
 
             free(infoLog);
         }
@@ -70,14 +77,16 @@ int Init(ESContext *esContext) {
             "   gl_Position = vPosition;              \n"
             "}                                        \n";
 
-    char fShaderStr[] =
-            "#version 300 es                              \n"
-            "precision mediump float;                     \n"
-            "out vec4 fragColor;                          \n"
-            "void main()                                  \n"
-            "{                                            \n"
-            "   fragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );  \n"
-            "}                                            \n";
+//    char fShaderStr[] =
+//            "#version 300 es                              \n"
+//            "precision mediump float;                     \n"
+//            "out vec4 fragColor;                          \n"
+//            "void main()                                  \n"
+//            "{                                            \n"
+//            "   fragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );  \n"
+//            "}                                            \n";
+    char *fShaderStr;
+    load_file(&fShaderStr, "sea.glsl");
 
     GLuint vertexShader;
     GLuint fragmentShader;
@@ -113,7 +122,7 @@ int Init(ESContext *esContext) {
             char *infoLog = malloc(sizeof(char) * infoLen);
 
             glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
-            esLogMessage("Error linking program:\n%s\n", infoLog);
+            loge("Error linking program:\n%s\n", infoLog);
 
             free(infoLog);
         }
@@ -121,6 +130,9 @@ int Init(ESContext *esContext) {
         glDeleteProgram(programObject);
         return FALSE;
     }
+
+    time_handle = glGetUniformLocation(programObject, "iGlobalTime");
+    resolution_handle = glGetUniformLocation(programObject, "iResolution");
 
     // Store the program object
     userData->programObject = programObject;
@@ -134,10 +146,11 @@ int Init(ESContext *esContext) {
 //
 void Draw(ESContext *esContext) {
     UserData *userData = esContext->userData;
-    GLfloat vVertices[] = {0.0f, 0.5f, 0.0f,
-                           -0.5f, -0.5f, 0.0f,
-                           0.5f, -0.5f, 0.0f
-    };
+    GLfloat vVertices[] = {
+            -1.0f, -1.0f, 0.0f,
+            -1.0f, 1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            1.0f,1.0f,0.0f};
 
     // Set the viewport
     glViewport(0, 0, esContext->width, esContext->height);
@@ -148,11 +161,14 @@ void Draw(ESContext *esContext) {
     // Use the program object
     glUseProgram(userData->programObject);
 
+    glUniform1f(time_handle, (float) clock() / CLOCKS_PER_SEC);
+    glUniform2f(resolution_handle, WIDTH, HEIGHT);
+
     // Load the vertex data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
     glEnableVertexAttribArray(0);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void Shutdown(ESContext *esContext) {
@@ -164,7 +180,7 @@ void Shutdown(ESContext *esContext) {
 int esMain(ESContext *esContext) {
     esContext->userData = malloc(sizeof(UserData));
 
-    if (!esCreateWindow(esContext, "Hello Triangle", 320, 240, ES_WINDOW_RGB)) {
+    if (!esCreateWindow(esContext, "Hello Triangle", WIDTH, HEIGHT, ES_WINDOW_RGB)) {
         printf("esCreateWindow return  GL_FALSE\n");
         return GL_FALSE;
     }
@@ -179,7 +195,7 @@ int esMain(ESContext *esContext) {
     return GL_TRUE;
 }
 
-int main1() {
+int main() {
     ESContext esContext;
 
     memset(&esContext, 0, sizeof(ESContext));
@@ -199,13 +215,5 @@ int main1() {
         free(esContext.userData);
     }
     printf("Running");
-    return 0;
-}
-
-
-int main(int argc, char **argv) {
-    char *content;
-    load_file(&content, "test.log");
-    logd("Finished Program");
     return 0;
 }

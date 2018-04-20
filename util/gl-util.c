@@ -253,14 +253,6 @@ ESUTIL_API esRegisterKeyFunc(ESContext *esContext, void (ESCALLBACK *keyFunc)(ES
     esContext->keyFunc = keyFunc;
 }
 
-void ESUTIL_API esLogMessage(const char *formatStr, ...) {
-    va_list params;
-    char buf[BUFSIZ];
-
-    printf("%s", buf);
-            va_end(params);
-}
-
 static esFile *esFileOpen(void *ioContext, const char *fileName) {
     esFile *pFile = NULL;
     pFile = fopen(fileName, "rb");
@@ -291,7 +283,7 @@ char *ESUTIL_API esLoadTGA(void *ioContext, const char *fileName, int *width, in
 
     if (fp == NULL)
     {
-        esLogMessage("esLoadTGA FAILED to load : { %s }\n", fileName);
+        printf("esLoadTGA FAILED to load : { %s }\n", fileName);
         return NULL;
     }
 
